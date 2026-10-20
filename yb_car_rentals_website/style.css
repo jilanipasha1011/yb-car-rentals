@@ -42,6 +42,7 @@
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 85px;
+  overflow-x: hidden;
 }
 
 body {
@@ -52,6 +53,9 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  width: 100%;
+  position: relative;
 }
 
 a {
@@ -320,14 +324,27 @@ h1, h2, h3, h4, h5, h6 {
   gap: 28px;
 }
 
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
 .nav-link {
   font-size: 13px;
   font-weight: 600;
   color: var(--ink-secondary);
+  white-space: nowrap;
 }
 
 .nav-link:hover {
   color: var(--accent-hover);
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
 .nav-cta {
@@ -340,12 +357,21 @@ h1, h2, h3, h4, h5, h6 {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  white-space: nowrap;
 }
 
 .nav-cta:hover {
   background: var(--accent-hover);
   color: #fff;
   transform: translateY(-1px);
+}
+
+.nav-mobile-contact {
+  display: none;
+}
+
+.nav-overlay {
+  display: none;
 }
 
 .header-actions {
@@ -365,6 +391,7 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
   color: var(--ink);
   border: 1px solid var(--border);
+  white-space: nowrap;
 }
 
 .header-phone-btn:hover {
@@ -373,23 +400,41 @@ h1, h2, h3, h4, h5, h6 {
 
 .menu-toggle {
   display: none;
-  background: none;
-  border: none;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
   cursor: pointer;
   padding: 8px;
   width: 40px;
   height: 40px;
   flex-direction: column;
+  align-items: center;
   justify-content: center;
   gap: 5px;
+  transition: var(--transition);
 }
 
 .menu-toggle span {
   display: block;
   height: 2px;
-  width: 24px;
+  width: 22px;
   background: var(--ink);
-  transition: var(--transition);
+  border-radius: 2px;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+  transform-origin: center;
+}
+
+.menu-toggle.active span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.menu-toggle.active span:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+
+.menu-toggle.active span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
 }
 
 /* ==========================================================================
@@ -781,6 +826,18 @@ h1, h2, h3, h4, h5, h6 {
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 16px;
   margin-bottom: 16px;
+}
+
+.form-row-split {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 16px;
+}
+
+.form-dates-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
 }
 
 .form-group {
@@ -1235,8 +1292,15 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--accent);
 }
 
-.benefit-icon {
-  font-size: 26px;
+.benefit-arrow {
+  color: #6b7280;
+  font-size: 16px;
+  transition: var(--transition);
+}
+
+.benefit-card:hover .benefit-arrow {
+  color: var(--accent);
+  transform: translate(2px, -2px);
 }
 
 .benefit-card h3 {
@@ -1726,24 +1790,30 @@ h1, h2, h3, h4, h5, h6 {
 
 .modal-close-btn {
   position: absolute;
-  top: 16px;
-  right: 16px;
+  top: 14px;
+  right: 14px;
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: #f3f4f6;
-  border: none;
-  font-size: 16px;
+  background: rgba(15, 17, 21, 0.7);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  font-size: 15px;
+  font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  z-index: 10;
+  z-index: 25;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
   transition: var(--transition);
 }
 
 .modal-close-btn:hover {
-  background: #e5e7eb;
+  background: rgba(15, 17, 21, 0.95);
+  transform: scale(1.08);
 }
 
 .modal-body {
@@ -1973,185 +2043,950 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* ==========================================================================
-   MOBILE STICKY ACTION BAR
+   MOBILE STICKY ACTION BAR & MODAL STATES
    ========================================================================== */
 .mobile-sticky-bar {
   display: none;
 }
 
+body.menu-active,
+body.modal-active {
+  overflow: hidden !important;
+}
+
+body.menu-active .mobile-sticky-bar,
+body.modal-active .mobile-sticky-bar {
+  display: none !important;
+}
+
+/* Custom sleek scrollbar */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f2f5;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c2c7d0;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
 /* ==========================================================================
-   RESPONSIVE MEDIA QUERIES
+   RESPONSIVE DESIGN SYSTEM
    ========================================================================== */
-@media (max-width: 1024px) {
+
+/* --- 1. Compact Laptops & Desktops (1024px - 1240px) --- */
+@media (max-width: 1240px) {
+  .section-container,
+  .header-inner,
+  .topline-content,
+  .dark-inner,
+  .footer-container {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .nav {
+    gap: 16px;
+  }
+
+  .nav-links {
+    gap: 14px;
+  }
+
+  .nav-link {
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  .nav-cta {
+    padding: 8px 14px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .header-phone-btn {
+    padding: 8px 12px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
   .hero-container {
-    grid-template-columns: 1fr;
-    gap: 40px;
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: 28px;
   }
-  
-  .booking-container {
-    grid-template-columns: 1fr;
-    gap: 24px;
+
+  .floating-stat.stat-1 {
+    right: 4px;
+    top: -10px;
   }
-  
+
+  .floating-stat.stat-2 {
+    left: -4px;
+    bottom: 16px;
+  }
+
   .fleet-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .benefits-grid, .trips-grid, .steps-grid, .review-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .footer-top {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .faq-layout {
-    grid-template-columns: 1fr;
+    gap: 20px;
   }
 }
 
-@media (max-width: 768px) {
-  .topline-content {
-    justify-content: center;
-    text-align: center;
-  }
-  
-  .topline-links {
-    display: none;
-  }
-  
+/* --- 2. Tablets, iPad Portrait & Landscape, Netbooks (768px - 1023px) --- */
+@media (max-width: 1023px) {
   .menu-toggle {
     display: flex;
   }
-  
+
   .header-phone-btn {
     display: none;
   }
-  
+
   .nav {
     position: fixed;
-    top: 76px;
-    left: 0;
+    top: 0;
     right: 0;
+    bottom: 0;
+    width: 320px;
+    max-width: 85vw;
+    height: 100vh;
+    height: 100dvh;
     background: #ffffff;
-    border-bottom: 1px solid var(--border);
+    border-left: 1px solid var(--border);
     flex-direction: column;
-    align-items: flex-start;
-    padding: 24px;
-    gap: 16px;
-    box-shadow: var(--shadow-xl);
-    transform: translateY(-120%);
-    transition: transform 0.3s ease;
-    z-index: 99;
+    align-items: stretch;
+    padding: 80px 24px 30px;
+    gap: 20px;
+    box-shadow: -10px 0 35px rgba(0, 0, 0, 0.18);
+    transform: translateX(100%);
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 101;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
-  
+
   .nav.open {
-    transform: translateY(0);
+    transform: translateX(0);
   }
-  
+
+  .nav-links {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    width: 100%;
+  }
+
   .nav-link {
     font-size: 15px;
-    width: 100%;
-    padding: 8px 0;
+    font-weight: 700;
+    color: var(--ink);
+    padding: 13px 0;
     border-bottom: 1px solid #f3f4f6;
+    width: 100%;
+    display: block;
+    transition: var(--transition);
   }
-  
+
+  .nav-link:hover {
+    color: var(--accent-hover);
+    padding-left: 6px;
+  }
+
+  .nav-actions {
+    flex-direction: column;
+    width: 100%;
+    gap: 16px;
+    margin-top: 6px;
+  }
+
   .nav-cta {
     width: 100%;
     justify-content: center;
-    margin-top: 8px;
+    padding: 13px;
+    font-size: 14px;
   }
-  
+
+  .nav-mobile-contact {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: auto;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  .nav-mobile-call,
+  .nav-mobile-wa {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .nav-mobile-call {
+    background: #f3f4f6;
+    color: var(--ink);
+    border: 1px solid var(--border);
+  }
+
+  .nav-mobile-wa {
+    background: #1f9c57;
+    color: #ffffff;
+  }
+
+  .nav-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 17, 21, 0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .nav-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
   .hero {
-    padding: 40px 0 50px;
+    padding: 46px 0 56px;
   }
-  
-  .hero h1 {
-    font-size: 38px;
-  }
-  
-  .hero-perks {
+
+  .hero-container {
     grid-template-columns: 1fr;
+    gap: 36px;
+    max-width: 680px;
+    margin: 0 auto;
   }
-  
+
+  .hero h1 {
+    font-size: clamp(34px, 5.2vw, 48px);
+  }
+
+  .hero-card-display {
+    max-width: 620px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
   .floating-stat {
     display: none;
   }
-  
+
+  .booking-container {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .fleet-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+
+  .benefits-grid,
+  .trips-grid,
+  .steps-grid,
+  .review-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+
+  .footer-top {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 36px;
+  }
+
+  .faq-layout {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+}
+
+/* --- 3. Mobile Devices & Small Tablets (<= 767px) --- */
+@media (max-width: 767px) {
+  .section-container,
+  .header-inner,
+  .dark-inner,
+  .footer-container {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .topline {
+    padding: 8px 14px;
+  }
+
+  .topline-content {
+    justify-content: center;
+    text-align: center;
+    font-size: 11px;
+    line-height: 1.4;
+  }
+
+  .topline-links {
+    display: none;
+  }
+
+  .header {
+    height: 64px;
+  }
+
+  .brand-mark {
+    width: 38px;
+    height: 38px;
+    font-size: 17px;
+  }
+
+  .brand-copy strong {
+    font-size: 14px;
+  }
+
+  .brand-copy small {
+    font-size: 8px;
+    letter-spacing: 0.12em;
+  }
+
+  .menu-toggle {
+    width: 38px;
+    height: 38px;
+    padding: 6px;
+  }
+
+  .menu-toggle span {
+    width: 20px;
+  }
+
+  /* Hero Section */
+  .hero {
+    padding: 28px 0 36px;
+  }
+
+  .eyebrow-pill {
+    font-size: 11px;
+    padding: 5px 12px;
+    margin-bottom: 14px;
+    gap: 8px;
+  }
+
+  .badge-star {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+
+  .hero h1 {
+    font-size: clamp(28px, 8.2vw, 36px);
+    margin-bottom: 14px;
+    line-height: 1.15;
+  }
+
+  .hero-text {
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 22px;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+    width: 100%;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .hero-actions .btn {
+    width: 100%;
+    min-height: 48px;
+    font-size: 14px;
+    justify-content: center;
+    padding: 13px 20px;
+  }
+
+  .hero-perks {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding-top: 18px;
+  }
+
+  .perk-item {
+    font-size: 12px;
+  }
+
+  .hero-card-display {
+    padding: 14px;
+    border-radius: var(--radius-md);
+  }
+
+  .hero-badge-top {
+    font-size: 10px;
+    margin-bottom: 10px;
+  }
+
+  .hero-image-wrap {
+    height: 210px;
+  }
+
+  .hero-car-selector {
+    margin-top: 12px;
+  }
+
+  .hero-thumbnails {
+    gap: 6px;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .thumb-btn {
+    min-width: 62px;
+    padding: 4px;
+  }
+
+  .thumb-btn img {
+    height: 32px;
+  }
+
+  .thumb-btn span {
+    font-size: 9px;
+  }
+
+  .hero-car-info {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    margin-top: 12px;
+    padding-top: 12px;
+  }
+
+  .hero-car-title {
+    font-size: 18px;
+  }
+
+  .hero-book-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 11px;
+    font-size: 13px;
+  }
+
+  /* Booking Strip */
+  .booking-strip {
+    padding: 38px 0;
+  }
+
+  .booking-intro h2 {
+    font-size: 24px;
+    margin: 6px 0 10px;
+  }
+
+  .booking-intro p {
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .quick-call-pill {
+    margin-top: 14px;
+    font-size: 12px;
+    padding: 7px 12px;
+    flex-wrap: wrap;
+  }
+
+  .booking-form {
+    padding: 18px 14px;
+    border-radius: var(--radius-md);
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+
+  .form-row-split {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .form-dates-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .form-group label {
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .form-group input,
+  .form-group select {
+    height: 48px;
+    font-size: 16px;
+    padding: 0 12px;
+    border-radius: 8px;
+  }
+
+  .form-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    margin-top: 16px;
+    padding-top: 14px;
+  }
+
+  .form-guarantee {
+    font-size: 11px;
+    line-height: 1.5;
+    max-width: 100%;
+  }
+
+  .submit-btn {
+    width: 100%;
+    height: 50px;
+    font-size: 14px;
+    justify-content: center;
+  }
+
+  /* Fleet Section */
+  .section {
+    padding: 48px 0;
+  }
+
+  .section-heading {
+    gap: 12px;
+    margin-bottom: 22px;
+  }
+
+  .section-heading h2 {
+    font-size: 26px;
+  }
+
+  .section-heading p {
+    font-size: 13px;
+  }
+
+  .fleet-filter-bar {
+    gap: 8px;
+    margin-bottom: 20px;
+    padding-bottom: 6px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .filter-btn {
+    padding: 8px 14px;
+    font-size: 12px;
+  }
+
   .fleet-grid {
     grid-template-columns: 1fr;
-  }
-  
-  .benefits-grid, .trips-grid, .steps-grid, .review-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .modal-body {
-    grid-template-columns: 1fr;
     gap: 20px;
-    padding: 20px;
   }
-  
-  .modal-image-col {
-    height: 220px;
-    min-height: unset;
+
+  .fleet-image-box {
+    height: 200px;
   }
-  
+
+  .fleet-content {
+    padding: 16px;
+  }
+
+  .car-title {
+    font-size: 18px;
+  }
+
+  .car-rate-tag strong {
+    font-size: 16px;
+  }
+
+  .specs-grid {
+    padding: 8px 10px;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+
+  .spec-label {
+    font-size: 9px;
+  }
+
+  .spec-val {
+    font-size: 11px;
+  }
+
+  .fleet-features-preview {
+    font-size: 11px;
+    gap: 4px 10px;
+    margin-bottom: 14px;
+  }
+
+  .fleet-card-actions {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .fleet-card-actions .btn {
+    padding: 11px 8px;
+    font-size: 12px;
+  }
+
+  .fleet-meta-bar {
+    font-size: 9px;
+    padding: 8px 16px;
+  }
+
+  .fleet-bottom-banner {
+    padding: 18px 16px;
+    margin-top: 24px;
+    flex-direction: column;
+    align-items: stretch;
+    text-align: left;
+  }
+
+  .fleet-bottom-banner .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Dark Section */
+  .dark-section {
+    padding: 50px 0;
+  }
+
+  .dark-header {
+    margin-bottom: 30px;
+    text-align: left;
+  }
+
+  .dark-header h2 {
+    font-size: 26px;
+    margin: 6px 0 10px;
+  }
+
+  .dark-header p {
+    font-size: 13px;
+  }
+
+  .benefits-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .benefit-card {
+    padding: 20px 18px;
+  }
+
+  .benefit-card h3 {
+    font-size: 17px;
+  }
+
+  .benefit-card p {
+    font-size: 13px;
+  }
+
+  /* Trips Section */
+  .trips-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .trip-card {
+    padding: 20px 18px;
+  }
+
+  .trip-card h3 {
+    font-size: 18px;
+  }
+
+  /* Steps Section */
+  .steps-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .step-card {
+    padding: 22px 18px;
+  }
+
+  .step-card h3 {
+    font-size: 18px;
+  }
+
+  /* Reviews Section */
+  .review-top {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .rating-badge-block {
+    text-align: left;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+  }
+
+  .rating-number {
+    margin: 0;
+    font-size: 22px;
+  }
+
+  .review-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .review-card {
+    padding: 20px 18px;
+  }
+
+  .google-cta-strip {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  /* FAQ Section */
+  .faq-sidebar h2 {
+    font-size: 26px;
+  }
+
+  .faq-sidebar p {
+    font-size: 13px;
+  }
+
+  .faq-contact-card {
+    padding: 18px 16px;
+    margin-top: 20px;
+  }
+
+  .faq-contact-card .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .faq-accordion summary {
+    font-size: 14px;
+    padding: 14px 0;
+    min-height: 48px;
+  }
+
+  /* Final CTA */
+  .final-cta {
+    padding: 44px 0;
+  }
+
+  .final-copy h2 {
+    font-size: 24px;
+  }
+
+  .final-copy p {
+    font-size: 13px;
+  }
+
+  .final-buttons {
+    flex-direction: column;
+    width: 100%;
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .final-buttons .btn {
+    width: 100%;
+    justify-content: center;
+    padding: 14px;
+  }
+
+  /* Footer */
+  .footer {
+    padding: 48px 0 24px;
+  }
+
   .footer-top {
     grid-template-columns: 1fr;
-    gap: 30px;
+    gap: 28px;
+    margin-bottom: 36px;
   }
-  
+
+  .footer-motto {
+    font-size: 15px;
+    margin: 12px 0 14px;
+  }
+
+  .footer-links a {
+    font-size: 13px;
+    display: inline-block;
+    padding: 4px 0;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+    padding-top: 18px;
+    font-size: 11px;
+  }
+
+  /* Mobile Sticky Action Bar */
   .mobile-sticky-bar {
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
-    background: #ffffff;
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border-top: 1px solid var(--border);
-    box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
     display: grid;
     grid-template-columns: 1fr 1fr;
-    padding: 10px 16px;
+    padding: 10px 14px calc(10px + env(safe-area-inset-bottom, 0px));
     gap: 10px;
-    z-index: 90;
+    z-index: 95;
   }
-  
+
   .sticky-btn {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    padding: 12px;
+    height: 46px;
     border-radius: var(--radius-sm);
     font-size: 13px;
     font-weight: 700;
+    text-decoration: none;
   }
-  
+
   .sticky-call {
     background: #f3f4f6;
     color: var(--ink);
     border: 1px solid var(--border);
   }
-  
+
   .sticky-wa {
     background: #1f9c57;
-    color: #fff;
+    color: #ffffff;
+    border: 1px solid #1f9c57;
   }
-  
+
   body {
-    padding-bottom: 70px;
+    padding-bottom: calc(75px + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Vehicle Details Modal on Mobile */
+  .modal-backdrop {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .modal-dialog {
+    max-height: 90vh;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    width: 100%;
+    margin: 0;
+  }
+
+  .modal-body {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 16px;
+  }
+
+  .modal-image-col {
+    height: 180px;
+    min-height: unset;
+    border-radius: 12px;
+  }
+
+  .modal-close-btn {
+    top: 12px;
+    right: 12px;
+    width: 34px;
+    height: 34px;
+    font-size: 14px;
+  }
+
+  .modal-title {
+    font-size: 20px;
+  }
+
+  .modal-specs-table {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .modal-actions {
+    position: sticky;
+    bottom: 0;
+    background: #ffffff;
+    padding: 10px 0 4px;
+    margin-top: 10px;
+    border-top: 1px solid #f3f4f6;
+  }
+
+  .modal-actions .btn {
+    height: 48px;
+    font-size: 14px;
   }
 }
 
+/* --- 4. Extra Small Phones (<= 380px) --- */
+@media (max-width: 380px) {
+  .section-container,
+  .header-inner,
+  .dark-inner,
+  .footer-container {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
 
-.benefit-arrow {
-  color: #6b7280;
-  font-size: 16px;
-  transition: var(--transition);
-}
+  .brand-mark {
+    width: 34px;
+    height: 34px;
+    font-size: 16px;
+  }
 
-.benefit-card:hover .benefit-arrow {
-  color: var(--accent);
-  transform: translate(2px, -2px);
+  .brand-copy strong {
+    font-size: 13px;
+  }
+
+  .hero h1 {
+    font-size: 26px;
+  }
+
+  .form-dates-group {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .fleet-card-actions {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .fleet-meta-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .modal-specs-table {
+    grid-template-columns: 1fr;
+  }
 }

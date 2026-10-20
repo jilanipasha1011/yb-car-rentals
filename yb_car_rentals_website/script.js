@@ -158,22 +158,58 @@ const fleetData = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. Mobile Menu Toggle
+  // 1. Mobile Menu Toggle & Drawer
   const menuToggle = document.getElementById('menuToggle');
   const mainNav = document.getElementById('mainNav');
+  const navOverlay = document.getElementById('navOverlay');
+
+  function openMenu() {
+    mainNav?.classList.add('open');
+    menuToggle?.classList.add('active');
+    navOverlay?.classList.add('open');
+    document.body.classList.add('menu-active');
+    menuToggle?.setAttribute('aria-expanded', 'true');
+    menuToggle?.setAttribute('aria-label', 'Close navigation');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeMenu() {
+    mainNav?.classList.remove('open');
+    menuToggle?.classList.remove('active');
+    navOverlay?.classList.remove('open');
+    document.body.classList.remove('menu-active');
+    menuToggle?.setAttribute('aria-expanded', 'false');
+    menuToggle?.setAttribute('aria-label', 'Open navigation');
+    if (!document.getElementById('carModal')?.classList.contains('open')) {
+      document.body.style.overflow = '';
+    }
+  }
 
   if (menuToggle && mainNav) {
-    menuToggle.addEventListener('click', () => {
-      const isOpen = mainNav.classList.toggle('open');
-      menuToggle.setAttribute('aria-expanded', String(isOpen));
-      menuToggle.setAttribute('aria-label', isOpen ? 'Close navigation' : 'Open navigation');
+    menuToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = mainNav.classList.contains('open');
+      if (isOpen) {
+        closeMenu();
+      } else {
+        openMenu();
+      }
     });
 
-    document.querySelectorAll('.nav-link, .nav-cta').forEach(link => {
+    if (navOverlay) {
+      navOverlay.addEventListener('click', closeMenu);
+    }
+
+    document.querySelectorAll('.nav-link, .nav-cta, .nav-mobile-call, .nav-mobile-wa').forEach(link => {
       link.addEventListener('click', () => {
-        mainNav.classList.remove('open');
-        menuToggle.setAttribute('aria-expanded', 'false');
+        closeMenu();
       });
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && mainNav.classList.contains('open')) {
+        closeMenu();
+      }
     });
   }
 
@@ -355,6 +391,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     modal.classList.add('open');
     modal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('modal-active');
     document.body.style.overflow = 'hidden';
   }
 
@@ -362,7 +399,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!modal) return;
     modal.classList.remove('open');
     modal.setAttribute('aria-hidden', 'true');
-    document.body.style.overflow = '';
+    document.body.classList.remove('modal-active');
+    if (!mainNav?.classList.contains('open')) {
+      document.body.style.overflow = '';
+    }
   }
 
   document.querySelectorAll('.quick-view-btn').forEach(btn => {
